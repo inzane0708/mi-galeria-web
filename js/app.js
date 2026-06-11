@@ -7,66 +7,47 @@ async function cargarDatos() {
 
     galeria.innerHTML = "Cargando...";
 
-    try {
+    const respuesta = await fetch("https://pokeapi.co/api/v2/pokemon?limit=20");
+    const datos = await respuesta.json();
 
-        const respuesta =
-        await fetch("https://pokeapi.co/api/v2/pokemon?limit=20");
+    listaPokemon = [];
 
-        if (!respuesta.ok) {
-            throw new Error("Error " + respuesta.status);
-        }
+    for (const pokemon of datos.results) {
 
-        const datos = await respuesta.json();
+        const detalle = await fetch(pokemon.url);
+        const info = await detalle.json();
 
-        listaPokemon = [];
-
-        for (const pokemon of datos.results) {
-
-            const detalle = await fetch(pokemon.url);
-            const info = await detalle.json();
-
-            listaPokemon.push(info);
-        }
-
-        mostrarPokemon(listaPokemon);
-
-    } catch (error) {
-
-        galeria.innerHTML = "No se pudieron cargar los datos.";
-        console.error(error);
+        listaPokemon.push(info);
     }
+
+    mostrarPokemon(listaPokemon);
 }
 
 function mostrarPokemon(lista) {
 
     galeria.innerHTML = "";
 
-    lista.forEach(info => {
+    lista.forEach(pokemon => {
 
-        const tarjeta = document.createElement("article");
-
-        tarjeta.className = "tarjeta";
-
-        tarjeta.innerHTML = `
-            <img src="${info.sprites.front_default}" alt="${info.name}">
-            <h3>${info.name}</h3>
+        galeria.innerHTML += `
+            <article class="tarjeta">
+                <img src="${pokemon.sprites.front_default}">
+                <h3>${pokemon.name}</h3>
+            </article>
         `;
-
-        galeria.appendChild(tarjeta);
     });
 }
 
-buscador.addEventListener("input", () => {
+buscador.addEventListener("keyup", function () {
 
-    const texto = buscador.value.toLowerCase();
+    const texto = this.value.toLowerCase();
 
-    const filtrados = listaPokemon.filter(pokemon =>
-        pokemon.name.includes(texto)
+    const resultado = listaPokemon.filter(pokemon =>
+        pokemon.name.toLowerCase().includes(texto)
     );
 
-    mostrarPokemon(filtrados);
+    mostrarPokemon(resultado);
 });
 
-document
-    .getElementById("cargar")
-    .addEventListener("click", cargarDatos);
+document.getElementById("cargar")
+.addEventListener("click", cargarDatos);
