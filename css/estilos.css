@@ -49,30 +49,3 @@
     font-weight:bold;
     cursor:pointer;
 }
-
-.modal-contenido{
-    animation: zoom 0.3s ease;
-}
-
-@keyframes zoom{
-
-    from{
-        transform:scale(0.7);
-        opacity:0;
-    }
-
-    to{
-        transform:scale(1);
-        opacity:1;
-    }
-}
-
-.modal-contenido h2{
-    font-size:40px;
-    text-transform:capitalize;
-}
-
-.modal-contenido p{
-    font-size:22px;
-    margin:10px;
-}
