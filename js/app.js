@@ -1,20 +1,39 @@
 const galeria = document.getElementById("galeria");
 const buscador = document.getElementById("buscar");
 
-const listaPokemon = [
-    {name:"bulbasaur", img:"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png"},
-    {name:"ivysaur", img:"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/2.png"},
-    {name:"venusaur", img:"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/3.png"},
-    {name:"charmander", img:"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png"},
-    {name:"charmeleon", img:"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/5.png"},
-    {name:"charizard", img:"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png"},
-    {name:"squirtle", img:"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png"},
-    {name:"wartortle", img:"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/8.png"},
-    {name:"blastoise", img:"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/9.png"},
-    {name:"pikachu", img:"https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png"}
-];
+let listaPokemon = [];
 
-function mostrarPokemon(lista){
+async function cargarDatos() {
+
+    try {
+
+        galeria.innerHTML = "Cargando...";
+
+        const respuesta = await fetch(
+            "https://pokeapi.co/api/v2/pokemon?limit=20"
+        );
+
+        if (!respuesta.ok) {
+            throw new Error("Error al obtener datos");
+        }
+
+        const datos = await respuesta.json();
+
+        listaPokemon = datos.results.map((pokemon, index) => ({
+            name: pokemon.name,
+            img: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${index + 1}.png`
+        }));
+
+        mostrarPokemon(listaPokemon);
+
+    } catch (error) {
+
+        galeria.innerHTML = "Error al cargar datos";
+        console.error(error);
+    }
+}
+
+function mostrarPokemon(lista) {
 
     galeria.innerHTML = "";
 
@@ -33,18 +52,17 @@ function mostrarPokemon(lista){
     });
 }
 
-document.getElementById("cargar")
-.addEventListener("click", () => {
-    mostrarPokemon(listaPokemon);
-});
-
 buscador.addEventListener("input", () => {
 
     const texto = buscador.value.toLowerCase();
 
     const resultado = listaPokemon.filter(pokemon =>
-        pokemon.name.includes(texto)
+        pokemon.name.toLowerCase().includes(texto)
     );
 
     mostrarPokemon(resultado);
 });
+
+document
+    .getElementById("cargar")
+    .addEventListener("click", cargarDatos);
