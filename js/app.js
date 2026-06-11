@@ -5,22 +5,32 @@ let listaPokemon = [];
 
 async function cargarDatos() {
 
-    galeria.innerHTML = "Cargando...";
+    try {
 
-    const respuesta = await fetch("https://pokeapi.co/api/v2/pokemon?limit=20");
-    const datos = await respuesta.json();
+        galeria.innerHTML = "Cargando...";
 
-    listaPokemon = [];
+        const respuesta = await fetch(
+            "https://pokeapi.co/api/v2/pokemon?limit=20"
+        );
 
-    for (const pokemon of datos.results) {
+        if (!respuesta.ok) {
+            throw new Error("Error al obtener datos");
+        }
 
-        const detalle = await fetch(pokemon.url);
-        const info = await detalle.json();
+        const datos = await respuesta.json();
 
-        listaPokemon.push(info);
+        listaPokemon = datos.results.map((pokemon, index) => ({
+            name: pokemon.name,
+            img: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${index + 1}.png`
+        }));
+
+        mostrarPokemon(listaPokemon);
+
+    } catch (error) {
+
+        galeria.innerHTML = "Error al cargar datos";
+        console.error(error);
     }
-
-    mostrarPokemon(listaPokemon);
 }
 
 function mostrarPokemon(lista) {
@@ -29,18 +39,22 @@ function mostrarPokemon(lista) {
 
     lista.forEach(pokemon => {
 
-        galeria.innerHTML += `
-            <article class="tarjeta">
-                <img src="${pokemon.sprites.front_default}">
-                <h3>${pokemon.name}</h3>
-            </article>
+        const tarjeta = document.createElement("article");
+
+        tarjeta.className = "tarjeta";
+
+        tarjeta.innerHTML = `
+            <img src="${pokemon.img}" alt="${pokemon.name}">
+            <h3>${pokemon.name}</h3>
         `;
+
+        galeria.appendChild(tarjeta);
     });
 }
 
-buscador.addEventListener("keyup", function () {
+buscador.addEventListener("input", () => {
 
-    const texto = this.value.toLowerCase();
+    const texto = buscador.value.toLowerCase();
 
     const resultado = listaPokemon.filter(pokemon =>
         pokemon.name.toLowerCase().includes(texto)
@@ -49,5 +63,6 @@ buscador.addEventListener("keyup", function () {
     mostrarPokemon(resultado);
 });
 
-document.getElementById("cargar")
-.addEventListener("click", cargarDatos);
+document
+    .getElementById("cargar")
+    .addEventListener("click", cargarDatos);
